@@ -1,7 +1,7 @@
 const socket = io();
 let counter = 2;
 socket.on("Serial-data:", dataSerial => {
-
+    console.log("uendel");
     myChart.data.labels.push(counter);
     if (dataSerial.value.indexOf(" %") != -1) {
         myChart.data.datasets[1].data.push(parseFloat(dataSerial.value.replace(" %", "")));

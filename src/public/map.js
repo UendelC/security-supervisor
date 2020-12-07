@@ -1,13 +1,11 @@
 const socket = io();
+let info = {};
+let count = 0;
+let lastCoordinates = [0,0];
+var markers = [];
 
-socket.on("Serial-data:", dataSerial => {
-	console.log(dataSerial);
-});
 
-var initialCoordinates = [-10.5085262, -40.3201187];
-let emergency = false;
-var mymap = L.map('mapid').setView(initialCoordinates, 13);
-
+var mymap = L.map('mapid').setView([-10, -40], 13);
 L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
 	attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
 	maxZoom: 18,
@@ -17,34 +15,58 @@ L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
 	accessToken: 'pk.eyJ1IjoidWVuZGVsIiwiYSI6ImNrZ3pjM3V0ZDBtMzkydW1zeWFlNWJ2OHQifQ.m5hstPrMYq2P80nuYTPmTA'
 }).addTo(mymap);
 
-var userName = 'Maria da Silva'
-emergencyMessage = emergency ? '<br> Socorro, preciso de ajuda' : ''
-var userMarkerMesssage = `${userName} ${emergencyMessage}`;
-const myCustomColour = 'red'
 
-const markerHtmlStyles = `
-	background-color: ${myCustomColour};
-	width: 3rem;
-	height: 3rem;
-	display: block;
-	left: -1.5rem;
-	top: -1.5rem;
-	position: relative;
-	border-radius: 3rem 3rem 0;
-	transform: rotate(45deg);
-	border: 1px solid #FFFFFF`
+socket.on("Serial-data:", dataSerial => {	
+	info = {
+		time: dataSerial.value.time,
+		lat: dataSerial.value.lat,
+		lon: dataSerial.value.lon,
+		valid: dataSerial.value.valid,
+	}
+	$('#teste').text(info.lat);
+	if (typeof info.lat !== 'undefined') {
+		var initialCoordinates = [info.lat,info.lon];
+		
+		emergencyMessage = '<br> Socorro, preciso de ajuda';
+		var userMarkerMesssage = `${emergencyMessage}`;
+		const myCustomColour = 'red';
 
-const icon = L.divIcon({
-	className: "my-custom-pin",
-	iconAnchor: [0, 24],
-	labelAnchor: [-6, 0],
-	popupAnchor: [0, -36],
-	html: `<span style="${markerHtmlStyles}" />`
-})
+		const markerHtmlStyles = `
+			background-color: ${myCustomColour};
+			width: 3rem;
+			height: 3rem;
+			display: block;
+			left: -1.5rem;
+			top: -1.5rem;
+			position: relative;
+			border-radius: 3rem 3rem 0;
+			transform: rotate(45deg);
+			border: 1px solid #FFFFFF`
 
-// O estilo do icone em caso de emergência deve ser melhorado
-let setIconEmergency = emergency ? {icon: icon} : {};
+		const icon = L.divIcon({
+			className: "my-custom-pin",
+			iconAnchor: [0, 24],
+			labelAnchor: [-6, 0],
+			popupAnchor: [0, -36],
+			html: `<span style="${markerHtmlStyles}" />`
+		})
 
-L.marker(initialCoordinates, setIconEmergency).addTo(mymap)
-	.bindPopup(userMarkerMesssage)
-	.openPopup();
+		// O estilo do icone em caso de emergência deve ser melhorado
+		let setIconEmergency = {icon: icon};
+
+		for (let i = 0; i < markers.length - 1; i++) {
+			mymap.removeLayer(markers[i]);
+		}
+		if(lastCoordinates[0] !== initialCoordinates[0] && initialCoordinates[1] !== lastCoordinates[1]){
+			lastCoordinates = initialCoordinates;
+			mymap.setView(lastCoordinates, 15);
+			let marker1 = L.marker(initialCoordinates, setIconEmergency)
+				.addTo(mymap)
+				.bindPopup(userMarkerMesssage)
+				.openPopup();
+
+			markers.push(marker1);
+		} 
+	}
+});
+

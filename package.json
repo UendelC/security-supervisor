@@ -12,6 +12,7 @@
   "dependencies": {
     "ejs": "^3.0.1",
     "express": "^4.17.1",
+    "gps": "^0.6.0",
     "nodemon": "^2.0.2",
     "serialport": "^8.0.7",
     "socket.io": "^2.3.0"
