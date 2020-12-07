@@ -5,7 +5,7 @@ let lastCoordinates = [0,0];
 var markers = [];
 
 
-var mymap = L.map('mapid').setView([-10, -40], 13);
+var mymap = L.map('mapid').setView([-9.4, -40.5], 13);
 L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
 	attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
 	maxZoom: 18,
@@ -23,10 +23,10 @@ socket.on("Serial-data:", dataSerial => {
 		lon: dataSerial.value.lon,
 		valid: dataSerial.value.valid,
 	}
-	$('#teste').text(info.lat);
+	
 	if (typeof info.lat !== 'undefined') {
 		var initialCoordinates = [info.lat,info.lon];
-		
+		console.log(info.lat, info.lon);
 		emergencyMessage = '<br> Socorro, preciso de ajuda';
 		var userMarkerMesssage = `${emergencyMessage}`;
 		const myCustomColour = 'red';
@@ -59,7 +59,11 @@ socket.on("Serial-data:", dataSerial => {
 		}
 		if(lastCoordinates[0] !== initialCoordinates[0] && initialCoordinates[1] !== lastCoordinates[1]){
 			lastCoordinates = initialCoordinates;
-			mymap.setView(lastCoordinates, 15);
+			mymap.setView(lastCoordinates, 16, {
+				"animate": true,
+				"pan": {
+				  "duration": 10
+				}});
 			let marker1 = L.marker(initialCoordinates, setIconEmergency)
 				.addTo(mymap)
 				.bindPopup(userMarkerMesssage)

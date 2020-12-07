@@ -27,14 +27,14 @@ port.open(err => {
         try {
             gps.update(data.toString());
         } catch {
-            
+            console.log("erro");
         }
         
     });
 });
 
 gps.on('data', data => {
-    console.log(data);
+    //console.log(data);
     io.emit("Serial-data:", {
         value: data, 
     });
@@ -48,10 +48,6 @@ app.set("view engine", "html");
 app.get("/", (request, response) => {
     response.render("index.html");
 });
-
-// io.on("connection", socket => {
-//     console.log("A user conneceted");
-// });
 
 const server = app.listen(3000, () => {
     console.log("Server Up and Running!!");
